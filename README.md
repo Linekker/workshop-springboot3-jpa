@@ -1,71 +1,61 @@
-# Projeto Web Services com Spring Boot, JPA e Hibernate
+# Web Services com Spring Boot, JPA e Hibernate
 
-Este projeto é uma aplicação desenvolvida em **Java** utilizando o **Spring Boot** para construção de APIs REST, junto com **JPA** e **Hibernate** para o mapeamento objeto-relacional e persistência de dados. O projeto visa exemplificar a construção de um serviço web completo, com entidades, relacionamentos e interações entre objetos que representam um domínio de vendas de produtos.
+## Objetivos do Projeto
+
+- Criar um projeto Spring Boot em Java.
+- Implementar um modelo de domínio baseado em entidades e relacionamentos.
+- Estruturar as camadas lógicas do sistema: Resource (controladores REST), Service (lógica de negócios), Repository (acesso a dados) e Entities (modelos de domínio).
+- Configurar um banco de dados de teste utilizando H2.
+- Implementar as operações básicas de CRUD (Create, Retrieve, Update, Delete).
+- Gerenciar o tratamento de exceções e erros.
 
 ## Tecnologias Utilizadas
-- **Java 21 (LTS)**: Linguagem de programação utilizada para construir a aplicação.
-- **Spring Boot**: Framework que simplifica o desenvolvimento de aplicações Java, especialmente na criação de APIs REST.
-- **Spring Data JPA**: Facilita o acesso a dados e a persistência com o banco de dados, utilizando a especificação JPA.
-- **Hibernate**: Implementação do JPA, responsável pelo mapeamento objeto-relacional (ORM) entre entidades Java e tabelas no banco de dados.
-- **H2 Database**: Banco de dados em memória utilizado durante o desenvolvimento.
-- **Maven**: Gerenciador de dependências e automação de build.
 
-## Funcionalidades da Aplicação
+- **Spring Boot**: Framework Java para criar aplicações web modernas e microserviços.
+- **JPA (Java Persistence API)**: Especificação de Java para gerenciar persistência de dados, facilitando o mapeamento objeto-relacional (ORM) entre as entidades Java e tabelas no banco de dados.
+- **Hibernate**: Implementação de JPA utilizada no projeto para gerenciar o ciclo de vida das entidades e o acesso ao banco de dados.
+- **H2 Database**: Banco de dados em memória usado para testes no ambiente de desenvolvimento.
+- **Maven**: Ferramenta de gerenciamento de dependências e construção do projeto.
+- **Heroku**: Plataforma de cloud computing utilizada para deploy da aplicação (opcional).
 
-A aplicação simula um sistema de vendas, onde é possível gerenciar **usuários**, **pedidos**, **produtos** e **pagamentos**. A seguir estão algumas das funcionalidades implementadas:
+## Estrutura do Projeto
 
-- **Gerenciamento de Usuários**:
-  - Listar todos os usuários cadastrados.
-  - Adicionar novos usuários ao sistema.
+O projeto segue uma arquitetura em camadas, separando responsabilidades entre as diferentes áreas do sistema:
 
-- **Gerenciamento de Pedidos**:
-  - Listar todos os pedidos realizados.
-  - Associar pedidos aos usuários cadastrados.
-  - Informar status do pedido (pendente, entregue, cancelado).
+1. **Application Layer**: O ponto de entrada da aplicação, onde o Spring Boot é inicializado.
+2. **Resource Layer**: Responsável pela comunicação entre o cliente e o servidor através de controladores REST. Exemplo de endpoint: `@GetMapping` para retornar dados de um usuário.
+3. **Service Layer**: Onde a lógica de negócios é implementada. Aqui estão os serviços que acessam as regras de negócio e fazem chamadas ao repositório.
+4. **Data Access Layer (Repositories)**: Camada responsável pela comunicação com o banco de dados, utilizando interfaces que estendem `JPARepository`.
+5. **Entities**: Representam as tabelas do banco de dados mapeadas como classes Java, com atributos que refletem as colunas do banco.
 
-- **Gerenciamento de Produtos**:
-  - Listar todos os produtos disponíveis.
-  - Adicionar produtos ao sistema.
-  - Relacionar produtos aos pedidos.
+### Modelagem do Domínio
 
-## Arquitetura
+O modelo de domínio inclui classes como `User`, `Order`, `Category`, `Product` e suas respectivas associações. Os relacionamentos são mapeados usando JPA, como:
 
-A aplicação é organizada em camadas, de forma a garantir modularidade e manutenção:
+- **One-to-Many**: Relacionamentos de um para muitos, como entre `User` e `Order`.
+- **Many-to-Many**: Exemplo com `Product` e `Category`, utilizando uma `JoinTable`.
 
-- **Entidades de Domínio**: Representam os objetos principais do sistema, como `User`, `Order`, `Product`, `OrderItem` e `Payment`. Essas entidades estão mapeadas para tabelas no banco de dados utilizando anotações do **JPA**.
+### Operações CRUD
 
-- **Serviços REST**: A API é implementada utilizando controladores REST para expor as funcionalidades do sistema. Por exemplo, o endpoint `/users` permite listar todos os usuários e `/orders` cria novos pedidos.
+O projeto implementa as operações básicas de um CRUD:
 
-### Diagrama UML
+- **Create**: Inserção de novos usuários, produtos, pedidos, etc.
+- **Retrieve**: Consulta e listagem de dados via endpoints REST.
+- **Update**: Atualização de dados existentes.
+- **Delete**: Exclusão de registros do banco de dados.
 
-O projeto conta com um **diagrama UML** que descreve os relacionamentos entre as entidades do sistema, ilustrando como **usuários**, **pedidos**, **itens de pedidos** e **produtos** interagem entre si. O diagrama mostra as seguintes entidades principais:
-- **User**: Representa o cliente que faz pedidos no sistema.
-- **Order**: Representa o pedido feito pelo cliente.
-- **Product**: Produtos disponíveis no catálogo.
-- **OrderItem**: Detalhes de cada item presente em um pedido.
-- **Payment**: Representa o pagamento de um pedido.
+### Povoamento de Dados
 
-### Exemplo de Endpoints REST
+Durante a inicialização, a aplicação utiliza classes de configuração para popular o banco de dados com instâncias de objetos (`User`, `Product`, `Order`, etc.). Isso é feito diretamente na camada de repositório com o auxílio do `EntityManager` e transações gerenciadas pelo Hibernate.
 
-- **GET /users**: Lista todos os usuários cadastrados no sistema.
-- **POST /orders**: Cria um novo pedido vinculado a um usuário.
-- **GET /products**: Lista todos os produtos disponíveis.
+### Exceções e Tratamento de Erros
 
-### Persistência de Dados
+O projeto lida com exceções específicas, como `ResourceNotFoundException` e `DatabaseException`, que são mapeadas para respostas adequadas no lado do cliente. Além disso, uma classe central chamada `ResourceExceptionHandler` gerencia essas exceções e retorna erros estruturados para o cliente.
 
-A aplicação faz uso do **JPA** para realizar a persistência de dados. A classe `EntityManager` é utilizada para gerenciar as operações de inserção, atualização e exclusão de dados no banco. Um exemplo de persistência de dados:
+### Camada de Serviço e Domínio
 
-```java
-EntityManagerFactory emf = Persistence.createEntityManagerFactory("exemplo-jpa");
-EntityManager em = emf.createEntityManager();
-em.getTransaction().begin();
-em.persist(novoUsuario);
-em.getTransaction().commit();
-em.close();
-```
+A camada de serviço implementa a lógica de negócios que interage com as entidades de domínio. Cada entidade, como `User`, `Order`, `Category`, é gerenciada por um serviço que encapsula as regras de negócio e delega a persistência de dados ao repositório.
 
-Esse exemplo mostra como um novo usuário é persistido no banco de dados por meio do **EntityManager**.
+### Camada de Acesso a Dados
 
-## Considerações Finais
-
-Este projeto foi desenvolvido com o objetivo de demonstrar como construir um serviço web robusto e modular utilizando **Spring Boot**, **JPA** e **Hibernate**, explorando conceitos de persistência, mapeamento objeto-relacional e boas práticas de desenvolvimento em Java.
+Utilizando a interface `JPARepository`, a camada de repositório acessa e manipula os dados no banco de dados sem a necessidade de escrever SQL manualmente, delegando essa responsabilidade ao Hibernate.
